@@ -9,6 +9,8 @@ WORKDIR /usr/src/app
 # Copy the local code to the container
 COPY ./api.go ./api.go
 
+COPY ./program.json ./program.json
+
 # Download any dependencies
 RUN go mod init example.com/api
 
