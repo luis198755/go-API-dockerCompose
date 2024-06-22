@@ -29,6 +29,21 @@ func getRandomArray(length int, max int, op int) []int {
 	return array
 }
 
+// Function to generate random values for the array
+func generateRandomArray() []int {
+	// Seed the random number generator
+	rand.Seed(time.Now().UnixNano())
+
+	// Generate random values within specified ranges
+	arr := []int{
+		rand.Intn(25),    // 0 to 24
+		rand.Intn(60),    // 0 to 59
+		rand.Intn(8) + 1, // 1 to 8 	rand.Intn(9),   // 0 to 8
+		rand.Intn(121),   // 0 to 120
+	}
+	return arr
+}
+
 func createRandomJSON() Data {
 	data := Data{
 		Escenarios: map[string][]int{
@@ -46,13 +61,13 @@ func createRandomJSON() Data {
 		},
 		Eventos: map[string][]int{
 			"1": {0, 0, 1, 0}, // Ensure the first Eventos element is {0,0,1,0}
-			"2": getRandomArray(4, 20, 0),
-			"3": getRandomArray(4, 20, 0),
-			"4": getRandomArray(4, 20, 0),
-			"5": getRandomArray(4, 20, 0),
-			"6": getRandomArray(4, 20, 0),
-			"7": getRandomArray(4, 20, 0),
-			"8": getRandomArray(4, 20, 0),
+			"2": generateRandomArray(),
+			"3": generateRandomArray(),
+			"4": generateRandomArray(),
+			"5": generateRandomArray(),
+			"6": generateRandomArray(),
+			"7": generateRandomArray(),
+			"8": generateRandomArray(),
 		},
 	}
 	return data
