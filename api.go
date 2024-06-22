@@ -18,13 +18,15 @@ type Data struct {
 }
 
 func getRandomArray(length int, max int, op int) []int {
-	rand.Seed(time.Now().UnixNano())
+	//rand.Seed(time.Now().UnixNano())
+	source := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(source)
 	array := make([]int, length)
 	if op == 0 {
 		array[0] = 0 // Ensure the first element is always 0
 	}
 	for i := op; i < length; i++ {
-		array[i] = rand.Intn(max)
+		array[i] = rng.Intn(max)
 	}
 	return array
 }
@@ -32,14 +34,16 @@ func getRandomArray(length int, max int, op int) []int {
 // Function to generate random values for the array
 func generateRandomArray() []int {
 	// Seed the random number generator
-	rand.Seed(time.Now().UnixNano())
+	//rand.Seed(time.Now().UnixNano())
+	source := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(source)
 
 	// Generate random values within specified ranges
 	arr := []int{
-		rand.Intn(25),    // 0 to 24
-		rand.Intn(60),    // 0 to 59
-		rand.Intn(8) + 1, // 1 to 8 	rand.Intn(9),   // 0 to 8
-		rand.Intn(121),   // 0 to 120
+		rng.Intn(25),    // 0 to 24
+		rng.Intn(60),    // 0 to 59
+		rng.Intn(8) + 1, //rand.Intn(8) + 1, // 1 to 8 	rand.Intn(9),   // 0 to 8
+		rng.Intn(121),   // 0 to 120
 	}
 	return arr
 }
