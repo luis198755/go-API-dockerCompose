@@ -68,7 +68,7 @@ func saveJSONToFile(filename string, data Data) error {
 }
 
 func main() {
-	http.HandleFunc("/data", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/random", func(w http.ResponseWriter, r *http.Request) {
 		data0 := createRandomJSON()
 		err := saveJSONToFile("random_data.json", data0)
 		if err != nil {
@@ -76,6 +76,27 @@ func main() {
 		}
 		// Read the JSON file
 		file, err := os.Open("random_data.json")
+		if err != nil {
+			http.Error(w, "Could not open file", http.StatusInternalServerError)
+			return
+		}
+		defer file.Close()
+
+		// Read file content
+		data, err := io.ReadAll(file)
+		if err != nil {
+			http.Error(w, "Could not read file", http.StatusInternalServerError)
+			return
+		}
+
+		// Write content as JSON response
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(data)
+	})
+
+	http.HandleFunc("/static", func(w http.ResponseWriter, r *http.Request) {
+		// Read the JSON file
+		file, err := os.Open("program.json")
 		if err != nil {
 			http.Error(w, "Could not open file", http.StatusInternalServerError)
 			return
