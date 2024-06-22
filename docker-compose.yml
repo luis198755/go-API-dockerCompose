@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  golang-app:
+    build: .
+    container_name: api
+    ports:
+      - "8080:8080"
+   # restart: unless-stopped
+   # volumes:
+    #  - .:/usr/src/app
