@@ -43,7 +43,7 @@ func createRandomJSON() Data {
 			"8": getRandomArray(31, 21000),
 		},
 		Eventos: map[string][]int{
-			"1": getRandomArray(4, 10),
+			"1": {0, 0, 1, 0}, // Ensure the first Eventos element is {0,0,1,0}
 			"2": getRandomArray(4, 20),
 			"3": getRandomArray(4, 20),
 			"4": getRandomArray(4, 20),
