@@ -17,11 +17,13 @@ type Data struct {
 	Eventos    map[string][]int `json:"eventos"`
 }
 
-func getRandomArray(length int, max int) []int {
+func getRandomArray(length int, max int, op int) []int {
 	rand.Seed(time.Now().UnixNano())
 	array := make([]int, length)
-	array[0] = 0 // Ensure the first element is always 0
-	for i := 1; i < length; i++ {
+	if op == 0 {
+		array[0] = 0 // Ensure the first element is always 0
+	}
+	for i := op; i < length; i++ {
 		array[i] = rand.Intn(max)
 	}
 	return array
@@ -30,27 +32,27 @@ func getRandomArray(length int, max int) []int {
 func createRandomJSON() Data {
 	data := Data{
 		Escenarios: map[string][]int{
-			"1": getRandomArray(31, 2500000000),
+			"1": getRandomArray(31, 2500000000, 1),
 		},
 		Ciclos: map[string][]int{
-			"1": getRandomArray(31, 15000),
-			"2": getRandomArray(31, 15000),
-			"3": getRandomArray(31, 21000),
-			"4": getRandomArray(31, 21000),
-			"5": getRandomArray(31, 21000),
-			"6": getRandomArray(31, 21000),
-			"7": getRandomArray(31, 21000),
-			"8": getRandomArray(31, 21000),
+			"1": getRandomArray(31, 15000, 1),
+			"2": getRandomArray(31, 15000, 1),
+			"3": getRandomArray(31, 21000, 1),
+			"4": getRandomArray(31, 21000, 1),
+			"5": getRandomArray(31, 21000, 1),
+			"6": getRandomArray(31, 21000, 1),
+			"7": getRandomArray(31, 21000, 1),
+			"8": getRandomArray(31, 21000, 1),
 		},
 		Eventos: map[string][]int{
 			"1": {0, 0, 1, 0}, // Ensure the first Eventos element is {0,0,1,0}
-			"2": getRandomArray(4, 20),
-			"3": getRandomArray(4, 20),
-			"4": getRandomArray(4, 20),
-			"5": getRandomArray(4, 20),
-			"6": getRandomArray(4, 20),
-			"7": getRandomArray(4, 20),
-			"8": getRandomArray(4, 20),
+			"2": getRandomArray(4, 20, 0),
+			"3": getRandomArray(4, 20, 0),
+			"4": getRandomArray(4, 20, 0),
+			"5": getRandomArray(4, 20, 0),
+			"6": getRandomArray(4, 20, 0),
+			"7": getRandomArray(4, 20, 0),
+			"8": getRandomArray(4, 20, 0),
 		},
 	}
 	return data
