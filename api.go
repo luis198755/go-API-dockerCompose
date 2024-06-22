@@ -20,7 +20,8 @@ type Data struct {
 func getRandomArray(length int, max int) []int {
 	rand.Seed(time.Now().UnixNano())
 	array := make([]int, length)
-	for i := 0; i < length; i++ {
+	array[0] = 0 // Ensure the first element is always 0
+	for i := 1; i < length; i++ {
 		array[i] = rand.Intn(max)
 	}
 	return array
