@@ -48,20 +48,46 @@ func generateRandomArray() []int {
 	return arr
 }
 
+func generateStructure() []int {
+	// Initialize the fixed values
+	fixedValues := []int{0, 10000, 375, 375, 375, 375, 375, 375, 375, 375, 3000, 20000, 375, 375, 375, 375, 375, 375, 375, 375, 3000, 30000, 375, 375, 375, 375, 375, 375, 375, 375, 3000}
+	structure := make([]int, len(fixedValues))
+	copy(structure, fixedValues)
+
+	// Iterate over the structure and replace non-fixed values with random values
+	for i := 0; i < len(structure); i++ {
+		if structure[i] != 0 && structure[i] != 375 && structure[i] != 3000 {
+			structure[i] = GenerateRandomValue() // Random value between 0 and 999 (you can change the range if needed)
+		}
+	}
+
+	return structure
+}
+
+// GenerateRandomValue generates a random value from 1000 to 120000 in multiples of 1000
+func GenerateRandomValue() int {
+	source := rand.NewSource(time.Now().UnixNano())
+	rng := rand.New(source)
+	min := 1   // Minimum multiplier (1000 * 1 = 1000)
+	max := 120 // Maximum multiplier (1000 * 120 = 120000)
+	randomMultiplier := rng.Intn(max-min+1) + min
+	return randomMultiplier * 1000
+}
+
 func createRandomJSON() Data {
 	data := Data{
 		Escenarios: map[string][]int{
 			"1": getRandomArray(31, 2500000000, 1),
 		},
 		Ciclos: map[string][]int{
-			"1": getRandomArray(31, 15000, 1),
-			"2": getRandomArray(31, 15000, 1),
-			"3": getRandomArray(31, 21000, 1),
-			"4": getRandomArray(31, 21000, 1),
-			"5": getRandomArray(31, 21000, 1),
-			"6": getRandomArray(31, 21000, 1),
-			"7": getRandomArray(31, 21000, 1),
-			"8": getRandomArray(31, 21000, 1),
+			"1": generateStructure(),
+			"2": generateStructure(),
+			"3": generateStructure(),
+			"4": generateStructure(),
+			"5": generateStructure(),
+			"6": generateStructure(),
+			"7": generateStructure(),
+			"8": generateStructure(),
 		},
 		Eventos: map[string][]int{
 			"1": {0, 0, 1, 0}, // Ensure the first Eventos element is {0,0,1,0}
