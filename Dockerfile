@@ -11,6 +11,8 @@ COPY ./api.go ./api.go
 
 COPY ./program.json ./program.json
 
+COPY ./index.html ./index.html
+
 # Download any dependencies
 RUN go mod init example.com/api
 

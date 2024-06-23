@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io"
 	"log"
 	"math/rand"
@@ -162,10 +163,64 @@ func staicJson(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-func main() {
-	http.HandleFunc("/random", randomJson)
+func serveStatus(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Ok")
+}
 
-	http.HandleFunc("/static", staicJson)
+func plain(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("HTML Vs Plain")
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprint(w, "<h1>Hello World<h1>")
+}
+
+func html(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("HTML Vs Plain")
+	w.Header().Set("Content-Type", "text/html")
+	fmt.Fprint(w, "<h1>Hello World<h1>")
+}
+
+func program(w http.ResponseWriter, r *http.Request) {
+	var fileName = "index.html"
+	t, err := template.ParseFiles(fileName)
+	if err != nil {
+		fmt.Println("Error parsing file")
+		return
+	}
+	err = t.ExecuteTemplate(w, fileName, nil)
+	if err != nil {
+		fmt.Println("Error when executing template", err)
+	}
+}
+
+func handleFunctions(w http.ResponseWriter, r *http.Request) {
+	switch r.URL.Path {
+	case "/":
+		fmt.Fprintln(w, "Hello World")
+	case "/random":
+		randomJson(w, r)
+	case "/static":
+		staicJson(w, r)
+	case "/plain":
+		plain(w, r)
+	case "/html":
+		html(w, r)
+	case "/status":
+		serveStatus(w, r)
+	case "/program":
+		program(w, r)
+	default:
+		fmt.Fprint(w, "Error")
+	}
+}
+
+func main() {
+	// http.HandleFunc("/random", randomJson)
+	// http.HandleFunc("/static", staicJson)
+	// http.HandleFunc("/status", serveStatus)
+	// http.HandleFunc("/plain", plain)
+	// http.HandleFunc("/html", html)
+
+	http.HandleFunc("/", handleFunctions)
 
 	fmt.Println("Server is running on port 80")
 	log.Fatal(http.ListenAndServe(":80", nil))
