@@ -115,53 +115,57 @@ func saveJSONToFile(filename string, data Data) error {
 	return encoder.Encode(data)
 }
 
+func randomJson(w http.ResponseWriter, r *http.Request) {
+	data0 := createRandomJSON()
+	err := saveJSONToFile("random_data.json", data0)
+	if err != nil {
+		panic(err)
+	}
+	// Read the JSON file
+	file, err := os.Open("random_data.json")
+	if err != nil {
+		http.Error(w, "Could not open file", http.StatusInternalServerError)
+		return
+	}
+	defer file.Close()
+
+	// Read file content
+	data, err := io.ReadAll(file)
+	if err != nil {
+		http.Error(w, "Could not read file", http.StatusInternalServerError)
+		return
+	}
+
+	// Write content as JSON response
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(data)
+}
+
+func staicJson(w http.ResponseWriter, r *http.Request) {
+	// Read the JSON file
+	file, err := os.Open("program.json")
+	if err != nil {
+		http.Error(w, "Could not open file", http.StatusInternalServerError)
+		return
+	}
+	defer file.Close()
+
+	// Read file content
+	data, err := io.ReadAll(file)
+	if err != nil {
+		http.Error(w, "Could not read file", http.StatusInternalServerError)
+		return
+	}
+
+	// Write content as JSON response
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(data)
+}
+
 func main() {
-	http.HandleFunc("/random", func(w http.ResponseWriter, r *http.Request) {
-		data0 := createRandomJSON()
-		err := saveJSONToFile("random_data.json", data0)
-		if err != nil {
-			panic(err)
-		}
-		// Read the JSON file
-		file, err := os.Open("random_data.json")
-		if err != nil {
-			http.Error(w, "Could not open file", http.StatusInternalServerError)
-			return
-		}
-		defer file.Close()
+	http.HandleFunc("/random", randomJson)
 
-		// Read file content
-		data, err := io.ReadAll(file)
-		if err != nil {
-			http.Error(w, "Could not read file", http.StatusInternalServerError)
-			return
-		}
-
-		// Write content as JSON response
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(data)
-	})
-
-	http.HandleFunc("/static", func(w http.ResponseWriter, r *http.Request) {
-		// Read the JSON file
-		file, err := os.Open("program.json")
-		if err != nil {
-			http.Error(w, "Could not open file", http.StatusInternalServerError)
-			return
-		}
-		defer file.Close()
-
-		// Read file content
-		data, err := io.ReadAll(file)
-		if err != nil {
-			http.Error(w, "Could not read file", http.StatusInternalServerError)
-			return
-		}
-
-		// Write content as JSON response
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(data)
-	})
+	http.HandleFunc("/static", staicJson)
 
 	fmt.Println("Server is running on port 80")
 	log.Fatal(http.ListenAndServe(":80", nil))
