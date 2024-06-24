@@ -24,30 +24,16 @@ services:
       - html:/usr/share/nginx/html
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-  # webluis:
-  #   build: .
-  #   restart: always
-  #   expose:
-  #     - '85:80'
-  #   environment:
-  #     - VIRTUAL_HOST=luissalberto.com
-  #     - LETSENCRYPT_HOST=luissalberto.com
-  #     - LETSENCRYPT_EMAIL=diego@luissalberto.com
-  #   volumes:
-  #     - ./Luis:/usr/share/nginx/html
-
   golang-app:
     build: .
     restart: always
     container_name: api
     expose:
-      - "8080:80"
+      - "80:80"
     environment:
       - VIRTUAL_HOST=centurion.key-city.com
       - LETSENCRYPT_HOST=centurion.key-city.com
       - LETSENCRYPT_MAIL=luis@key-city.com
-    # volumes:
-    #   - ./Crepas:/usr/share/nginx/html
 
 volumes:
   certs:
