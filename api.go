@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var fases = 5
+var fases = 10
 
 type Data struct {
 	Fases      map[string][]int `json:"fases"`
