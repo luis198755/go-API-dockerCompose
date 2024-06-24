@@ -222,6 +222,6 @@ func main() {
 
 	http.HandleFunc("/", handleFunctions)
 
-	fmt.Println("Server is running on port 80")
-	log.Fatal(http.ListenAndServe(":80", nil))
+	fmt.Println("Server is running on port 8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

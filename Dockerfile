@@ -26,7 +26,7 @@ RUN go mod init example.com/api
 RUN go build -o api
 
 # Expose port 8080 to the outside world
-EXPOSE 80
+EXPOSE 8080
 
 # Step 7: Command to run the executable
 CMD ["./api"]
