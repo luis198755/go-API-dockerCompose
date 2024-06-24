@@ -12,7 +12,10 @@ import (
 	"time"
 )
 
+var fases = 5
+
 type Data struct {
+	Fases      map[string][]int `json:"fases"`
 	Escenarios map[string][]int `json:"escenarios"`
 	Ciclos     map[string][]int `json:"ciclos"`
 	Eventos    map[string][]int `json:"eventos"`
@@ -77,6 +80,9 @@ func GenerateRandomValue() int {
 
 func createRandomJSON() Data {
 	data := Data{
+		Fases: map[string][]int{
+			"1": {fases},
+		},
 		Escenarios: map[string][]int{
 			"1": getRandomArray(31, 2500000000, 1),
 		},
