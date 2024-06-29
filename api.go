@@ -198,6 +198,29 @@ func program(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func programJson(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var data Data
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		http.Error(w, "Invalid JSON data", http.StatusBadRequest)
+		return
+	}
+
+	err = saveJSONToFile("program.json", data)
+	if err != nil {
+		http.Error(w, "Could not save data", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Data saved successfully"))
+}
+
 func handleFunctions(w http.ResponseWriter, r *http.Request) {
 	switch r.URL.Path {
 	case "/":
@@ -214,8 +237,10 @@ func handleFunctions(w http.ResponseWriter, r *http.Request) {
 		html(w, r)
 	case "/status":
 		serveStatus(w, r)
-	case "/program":
+	case "/programSem":
 		program(w, r)
+	case "/program":
+		programJson(w, r)
 	default:
 		fmt.Fprint(w, "Error")
 	}
