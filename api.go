@@ -230,7 +230,7 @@ func handleFunctions(w http.ResponseWriter, r *http.Request) {
 	case "/static":
 		staicJson(w, r)
 	case "/jsonProg":
-		randomJson(w, r)
+		staicJson(w, r)
 	case "/plain":
 		plain(w, r)
 	case "/html":
