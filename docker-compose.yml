@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   nginx-proxy:
     image: jwilder/nginx-proxy
@@ -15,8 +13,6 @@ services:
       - html:/usr/share/nginx/html
     labels:
       - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
-    networks:
-      - custom-network
       
   letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion:v1.12
@@ -27,21 +23,17 @@ services:
       - vhostd:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - custom-network
 
   golang-app:
     build: .
     restart: always
     container_name: api
     expose:
-      - "80"
+      - "80:80"
     environment:
       - VIRTUAL_HOST=centurion.key-city.com
       - LETSENCRYPT_HOST=centurion.key-city.com
       - LETSENCRYPT_MAIL=luis@key-city.com
-    networks:
-      - custom-network
 
 volumes:
   certs:
@@ -49,10 +41,7 @@ volumes:
   vhostd:
   confd:
 
-networks:
-  custom-network:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 192.168.4.0/24
-          gateway: 192.168.4.1
+
+  
+
+
