@@ -199,13 +199,14 @@ func program(w http.ResponseWriter, r *http.Request) {
 }
 
 func programJson(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+	params := r.URL.Query().Get("params")
+	if params == "" {
+		http.Error(w, "Missing params", http.StatusBadRequest)
 		return
 	}
 
 	var data Data
-	err := json.NewDecoder(r.Body).Decode(&data)
+	err := json.Unmarshal([]byte(params), &data)
 	if err != nil {
 		http.Error(w, "Invalid JSON data", http.StatusBadRequest)
 		return
