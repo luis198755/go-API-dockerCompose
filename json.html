@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Console</title>
+    <link rel="icon" href="./icon.ico" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 80%;
+            max-width: 600px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        textarea {
+            width: 100%;
+            height: 50vh;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+        }
+        .btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background-color: #f5a5e4;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #e280c7;
+        }
+        #message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .error {
+            background-color: #ffcccc;
+            color: #cc0000;
+        }
+        .success {
+            background-color: #ccffcc;
+            color: #006600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Console</h1>
+        <form id="jsonForm">
+            <textarea id="jsonInput" name="params" placeholder="Enter your JSON here..."></textarea>
+            <button type="submit" class="btn">Submit</button>
+        </form>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        document.getElementById('jsonForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const jsonInput = document.getElementById('jsonInput').value;
+            const messageDiv = document.getElementById('message');
+            
+            try {
+                const parsedJson = JSON.parse(jsonInput);
+                
+                if (validateJsonStructure(parsedJson)) {
+                    messageDiv.textContent = 'JSON structure is valid. Sending data...';
+                    messageDiv.className = 'success';
+                    console.log('Sending JSON:', parsedJson);
+                } else {
+                    throw new Error('Invalid JSON structure');
+                }
+            } catch (error) {
+                messageDiv.textContent = 'Error: ' + error.message;
+                messageDiv.className = 'error';
+            }
+        });
+
+        function validateJsonStructure(json) {
+            // Check for required top-level keys
+            const requiredKeys = ['fases', 'escenarios', 'ciclos', 'eventos'];
+            for (const key of requiredKeys) {
+                if (!(key in json)) {
+                    return false;
+                }
+            }
+
+            // Check structure of 'fases'
+            if (!Array.isArray(json.fases['1'])) {
+                return false;
+            }
+
+            // Check structure of 'escenarios' and get its length
+            if (!Array.isArray(json.escenarios['1'])) {
+                return false;
+            }
+            const escenarioLength = json.escenarios['1'].length;
+
+            // Check structure of 'ciclos' and 'eventos'
+            for (let i = 1; i <= 8; i++) {
+                const key = i.toString();
+                
+                // Check that 'ciclos' arrays are either zero length or have a length up to 'escenarios' length
+                if (!Array.isArray(json.ciclos[key]) || 
+                    (json.ciclos[key].length !== 0 && json.ciclos[key].length > escenarioLength)) {
+                    return false;
+                }
+                
+                // Check that 'eventos' arrays have between 0 and 5 elements
+                if (!Array.isArray(json.eventos[key]) || json.eventos[key].length > 5) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    </script>
+</body>
+</html>

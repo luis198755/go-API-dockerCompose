@@ -13,6 +13,8 @@ COPY ./program.json ./program.json
 
 COPY ./index.html ./index.html
 
+COPY ./json.html ./json.html
+
 # Download any dependencies
 RUN go mod init example.com/api
 

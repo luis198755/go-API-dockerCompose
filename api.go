@@ -198,6 +198,19 @@ func program(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func programJsonRaw(w http.ResponseWriter, r *http.Request) {
+	var fileName = "json.html"
+	t, err := template.ParseFiles(fileName)
+	if err != nil {
+		fmt.Println("Error parsing file")
+		return
+	}
+	err = t.ExecuteTemplate(w, fileName, nil)
+	if err != nil {
+		fmt.Println("Error when executing template", err)
+	}
+}
+
 func programJson(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query().Get("params")
 	if params == "" {
@@ -241,6 +254,8 @@ func handleFunctions(w http.ResponseWriter, r *http.Request) {
 	case "/programSem":
 		program(w, r)
 	case "/program":
+		programJson(w, r)
+	case "/json":
 		programJson(w, r)
 	default:
 		fmt.Fprint(w, "Error")
