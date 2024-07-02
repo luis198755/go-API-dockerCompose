@@ -256,7 +256,7 @@ func handleFunctions(w http.ResponseWriter, r *http.Request) {
 	case "/program":
 		programJson(w, r)
 	case "/json":
-		programJson(w, r)
+		programJsonRaw(w, r)
 	default:
 		fmt.Fprint(w, "Error")
 	}
