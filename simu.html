@@ -400,41 +400,41 @@
             totalCycleDiv.innerHTML = `<div><span class="info-label">Ciclo total:</span> <span class="info-value">${totalCycleSec}s</span></div>`;
         }
 
-        // // Nueva función para cargar el JSON automáticamente
+        // Nueva función para cargar el JSON automáticamente
+        function loadJSONFromURL() {
+             const url = '/static';
+             fetch(url)
+                 .then(response => response.text())
+                 .then(data => {
+                     document.getElementById('jsonInput').value = data;
+                     console.log('JSON cargado automáticamente');
+                 })
+                .catch(error => {
+                     console.error('Error al cargar el JSON:', error);
+                     document.getElementById('jsonInput').value = 'Error al cargar el JSON. Por favor, intente nuevamente o ingrese el JSON manualmente.';
+                 });
+        }
+
+        // Función modificada para cargar el JSON automáticamente usando un proxy CORS
         // function loadJSONFromURL() {
-        //     const url = 'https://centurion.key-city.com/random';
-        //     fetch(url)
-        //         .then(response => response.text())
+        //     const targetUrl = 'https://centurion.key-city.com/random';
+        //     const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
+            
+        //     fetch(proxyUrl)
+        //         .then(response => response.json())
         //         .then(data => {
-        //             document.getElementById('jsonInput').value = data;
-        //             console.log('JSON cargado automáticamente');
+        //             if (data.contents) {
+        //                 document.getElementById('jsonInput').value = data.contents;
+        //                 console.log('JSON cargado automáticamente');
+        //             } else {
+        //                 throw new Error('No se pudo obtener el contenido del JSON');
+        //             }
         //         })
         //         .catch(error => {
         //             console.error('Error al cargar el JSON:', error);
         //             document.getElementById('jsonInput').value = 'Error al cargar el JSON. Por favor, intente nuevamente o ingrese el JSON manualmente.';
         //         });
         // }
-
-        // Función modificada para cargar el JSON automáticamente usando un proxy CORS
-        function loadJSONFromURL() {
-            const targetUrl = 'https://centurion.key-city.com/random';
-            const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
-            
-            fetch(proxyUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.contents) {
-                        document.getElementById('jsonInput').value = data.contents;
-                        console.log('JSON cargado automáticamente');
-                    } else {
-                        throw new Error('No se pudo obtener el contenido del JSON');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al cargar el JSON:', error);
-                    document.getElementById('jsonInput').value = 'Error al cargar el JSON. Por favor, intente nuevamente o ingrese el JSON manualmente.';
-                });
-        }
 
          // Inicialización
         createTrafficLights();
