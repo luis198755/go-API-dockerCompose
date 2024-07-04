@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TrafficLight de México</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .traffic-lights {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .traffic-light-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px;
+        }
+        .traffic-light-label {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .traffic-light {
+            width: 50px;
+            height: 150px;
+            background-color: #333;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            padding: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        .light {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+        .red { background-color: #ff0000; }
+        .yellow { background-color: #ffff00; }
+        .green { background-color: #00ff00; }
+        .light.active {
+            opacity: 1;
+            box-shadow: 0 0 20px 5px currentColor;
+        }
+        .red.active { background-color: #ff4444; }
+        .yellow.active { background-color: #ffff44; }
+        .green.active { background-color: #44ff44; }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+            resize: vertical;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #clock, #debug, #currentInfo, #cycleInfo, #totalCycleInfo, #phaseInfo {
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        #result {
+            font-size: 18px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .info-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .info-value {
+            font-family: monospace;
+        }
+        .cycle-element {
+            display: inline-block;
+            padding: 2px 5px;
+            margin: 2px;
+            border-radius: 3px;
+        }
+        .cycle-element.active {
+            background-color: #00ff00;
+            color: black;
+            font-weight: bold;
+        }
+        .countdown {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>TrafficLight de México - Simulador Centurión</h1>
+    
+    <div class="section">
+        <div class="section-title">Hora Actual</div>
+        <div id="clock"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Información Actual</div>
+        <div id="phaseInfo"></div>
+        <div id="currentInfo"></div>
+        <div id="cycleInfo"></div>
+        <div id="totalCycleInfo"></div>
+        <div id="debug"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Fases</div>
+        <div class="traffic-lights" id="trafficLights"></div>
+        <!-- <div id="result">Número representado: 0</div> -->
+    </div>
+
+    <div class="section">
+        <div class="section-title">Configuración y Control</div>
+        <textarea id="jsonInput" placeholder="Cargando JSON..."></textarea>
+        <div>
+            <button onclick="loadAndStart(false)">Play</button>
+            <button onclick="loadAndStart(true)">Inicio Asíncrono</button>
+        </div>
+    </div>
+
+    <script>
+        let config = null;
+        let currentSequence = null;
+        let sequenceTimeout = null;
+        let currentEvent = null;
+        let offsetCountdown = null;
+
+        function createTrafficLights() {
+            const container = document.getElementById('trafficLights');
+            for (let i = 0; i < 10; i++) {
+                const trafficLightContainer = document.createElement('div');
+                trafficLightContainer.className = 'traffic-light-container';
+                
+                const label = document.createElement('div');
+                label.className = 'traffic-light-label';
+                label.textContent = i + 1;
+                trafficLightContainer.appendChild(label);
+
+                const light = document.createElement('div');
+                light.className = 'traffic-light';
+                light.innerHTML = `
+                    <div class="light red" id="red-${i}"></div>
+                    <div class="light yellow" id="yellow-${i}"></div>
+                    <div class="light green" id="green-${i}"></div>
+                `;
+                trafficLightContainer.appendChild(light);
+
+                container.appendChild(trafficLightContainer);
+            }
+        }
+
+        function updateLights(number) {
+            const binary = number.toString(2).padStart(32, '0');
+            const relevantBits = binary.slice(0, 30);
+
+            for (let i = 0; i < 10; i++) {
+                const redLight = document.getElementById(`red-${i}`);
+                const yellowLight = document.getElementById(`yellow-${i}`);
+                const greenLight = document.getElementById(`green-${i}`);
+
+                redLight.classList.toggle('active', relevantBits[i * 3] === '1');
+                yellowLight.classList.toggle('active', relevantBits[i * 3 + 1] === '1');
+                greenLight.classList.toggle('active', relevantBits[i * 3 + 2] === '1');
+            }
+
+            //document.getElementById('result').textContent = `Número representado: ${number}`;
+        }
+
+        function resetSystem() {
+            // Detener cualquier secuencia en ejecución
+            if (sequenceTimeout) {
+                clearTimeout(sequenceTimeout);
+            }
+            if (offsetCountdown) {
+                clearInterval(offsetCountdown);
+            }
+
+            // Reiniciar variables globales
+            config = null;
+            currentSequence = null;
+            currentEvent = null;
+
+            // Limpiar información en la interfaz
+            document.getElementById('phaseInfo').innerHTML = '';
+            document.getElementById('currentInfo').innerHTML = '';
+            document.getElementById('cycleInfo').innerHTML = '';
+            document.getElementById('totalCycleInfo').innerHTML = '';
+            document.getElementById('debug').textContent = 'Sistema reiniciado';
+
+            // Apagar todos los semáforos
+            updateLights(0);
+
+            console.log('Sistema reiniciado');
+        }
+
+        function loadAndStart(isAsynchronous) {
+            resetSystem();
+            try {
+                const jsonText = document.getElementById('jsonInput').value;
+                config = JSON.parse(jsonText);
+                console.log('Configuración cargada:', config);
+                updatePhaseInfo();
+                startSequence(isAsynchronous);
+            } catch (error) {
+                alert('Error al parsear el JSON: ' + error);
+            }
+        }
+
+        function updatePhaseInfo() {
+            if (config && config.fases && config.fases["1"]) {
+                const numSemaforos = config.fases["1"][0];
+                const phaseInfoDiv = document.getElementById('phaseInfo');
+                phaseInfoDiv.innerHTML = `<div><span class="info-label">No. de fases:</span> <span class="info-value">${numSemaforos}</span></div>`;
+            }
+        }
+
+        function startSequence(isAsynchronous) {
+            if (!config) {
+                alert('Por favor, ingrese un JSON válido primero');
+                return;
+            }
+
+            const lastEvent = findLastEvent();
+            if (!lastEvent) {
+                alert('No se encontró ningún evento anterior');
+                return;
+            }
+
+            if (isAsynchronous) {
+                console.log('Iniciando secuencia asíncrona inmediatamente');
+                document.getElementById('debug').textContent = 'Inicio asíncrono: Secuencia iniciada inmediatamente';
+                executeEvent(lastEvent);
+            } else {
+                const now = new Date();
+                const nextEvenMinute = new Date(now);
+                if (nextEvenMinute.getMinutes() % 2 !== 0 || nextEvenMinute.getSeconds() !== 0) {
+                    nextEvenMinute.setMinutes(nextEvenMinute.getMinutes() + (nextEvenMinute.getMinutes() % 2 ? 1 : 2), 0, 0);
+                }
+
+                const waitTime = nextEvenMinute.getTime() - now.getTime();
+
+                console.log(`Iniciando último evento en: ${nextEvenMinute.toLocaleString()}`);
+                document.getElementById('debug').textContent = `Próximo inicio: ${nextEvenMinute.toLocaleString()}`;
+
+                setTimeout(() => {
+                    console.log('Ejecutando último evento:', lastEvent);
+                    executeEvent(lastEvent);
+                }, waitTime);
+            }
+        }
+
+        function executeEvent(event) {
+            currentEvent = event;
+            const cycleKey = event[2].toString();
+            const offset = event[3]; // Ya está en segundos
+            const cycle = config.ciclos[cycleKey];
+            const escenario = config.escenarios["1"]; // Asumimos que siempre usamos el escenario "1"
+            
+            console.log(`Iniciando secuencia con ciclo ${cycleKey} y offset ${offset}s`);
+            
+            updateCurrentInfo(event, cycleKey, offset);
+            updateCycleInfo(cycle, 0);
+            startOffsetCountdown(offset);
+
+            setTimeout(() => {
+                currentSequence = {
+                    escenarios: escenario,
+                    ciclo: cycle,
+                    index: 0
+                };
+                nextInSequence();
+            }, offset * 1000); // Convertir a milisegundos para setTimeout
+        }
+
+        function startOffsetCountdown(offset) {
+            let remainingOffset = offset;
+            offsetCountdown = setInterval(() => {
+                remainingOffset--;
+                updateCurrentInfo(currentEvent, currentEvent[2].toString(), offset, 0, remainingOffset);
+                if (remainingOffset <= 0) {
+                    clearInterval(offsetCountdown);
+                }
+            }, 1000);
+        }
+
+        function nextInSequence() {
+            if (!currentSequence) {
+                console.log('No hay secuencia actual');
+                return;
+            }
+
+            const number = currentSequence.escenarios[currentSequence.index];
+            const duration = currentSequence.ciclo[currentSequence.index];
+
+            console.log(`Mostrando número: ${number}, duración: ${duration}ms`);
+            updateLights(number);
+            updateCurrentInfo(currentEvent, currentEvent[2].toString(), currentEvent[3], currentSequence.index);
+            updateCycleInfo(currentSequence.ciclo, currentSequence.index);
+
+            currentSequence.index = (currentSequence.index + 1) % currentSequence.escenarios.length;
+
+            sequenceTimeout = setTimeout(nextInSequence, duration);
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleString();
+        }
+
+        function findLastEvent() {
+            const now = new Date();
+            let lastEvent = null;
+            let lastEventTime = new Date(0); // Inicializar con la fecha más antigua posible
+
+            for (let key in config.eventos) {
+                const event = config.eventos[key];
+                const eventTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), event[0], event[1]);
+                
+                if (eventTime <= now && eventTime > lastEventTime) {
+                    lastEvent = event;
+                    lastEventTime = eventTime;
+                }
+            }
+
+            return lastEvent;
+        }
+
+        function updateCurrentInfo(event, cycleKey, offset, index = 0, remainingOffset = null) {
+            const infoDiv = document.getElementById('currentInfo');
+            let offsetDisplay = `${offset}s`;
+            if (remainingOffset !== null && remainingOffset > 0) {
+                offsetDisplay = `<span class="countdown">${remainingOffset}</span>/${offset}s`;
+            }
+            infoDiv.innerHTML = `
+                <div><span class="info-label">Evento actual:</span> <span class="info-value">${event[0].toString().padStart(2, '0')}:${event[1].toString().padStart(2, '0')}</span></div>
+                <div><span class="info-label">Ciclo:</span> <span class="info-value">${cycleKey}</span></div>
+                <div><span class="info-label">Sincronía:</span> <span class="info-value">${offsetDisplay}</span></div>
+                <div><span class="info-label">Índice de escenario:</span> <span class="info-value">${index}</span></div>
+            `;
+        }
+
+        
+
+        function updateCycleInfo(cycle, activeIndex) {
+            const infoDiv = document.getElementById('cycleInfo');
+            let cycleHTML = '<div><span class="info-label">Ciclo actual:</span></div><div class="info-value">';
+            
+            cycle.forEach((element, index) => {
+                const secondsValue = (element / 1000).toFixed(3);
+                cycleHTML += `<span class="cycle-element ${index === activeIndex ? 'active' : ''}">${secondsValue}s</span>`;
+            });
+            
+            cycleHTML += '</div>';
+            infoDiv.innerHTML = cycleHTML;
+
+            // Calcular y mostrar el ciclo total
+            const totalCycleMs = cycle.reduce((sum, current) => sum + current, 0);
+            const totalCycleSec = (totalCycleMs / 1000).toFixed(3);
+            const totalCycleDiv = document.getElementById('totalCycleInfo');
+            totalCycleDiv.innerHTML = `<div><span class="info-label">Ciclo total:</span> <span class="info-value">${totalCycleSec}s</span></div>`;
+        }
+
+        // // Nueva función para cargar el JSON automáticamente
+        // function loadJSONFromURL() {
+        //     const url = 'https://centurion.key-city.com/random';
+        //     fetch(url)
+        //         .then(response => response.text())
+        //         .then(data => {
+        //             document.getElementById('jsonInput').value = data;
+        //             console.log('JSON cargado automáticamente');
+        //         })
+        //         .catch(error => {
+        //             console.error('Error al cargar el JSON:', error);
+        //             document.getElementById('jsonInput').value = 'Error al cargar el JSON. Por favor, intente nuevamente o ingrese el JSON manualmente.';
+        //         });
+        // }
+
+        // Función modificada para cargar el JSON automáticamente usando un proxy CORS
+        function loadJSONFromURL() {
+            const targetUrl = 'https://centurion.key-city.com/random';
+            const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
+            
+            fetch(proxyUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.contents) {
+                        document.getElementById('jsonInput').value = data.contents;
+                        console.log('JSON cargado automáticamente');
+                    } else {
+                        throw new Error('No se pudo obtener el contenido del JSON');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar el JSON:', error);
+                    document.getElementById('jsonInput').value = 'Error al cargar el JSON. Por favor, intente nuevamente o ingrese el JSON manualmente.';
+                });
+        }
+
+         // Inicialización
+        createTrafficLights();
+        setInterval(updateClock, 1000);
+        loadJSONFromURL(); // C
+    </script>
+</body>
+</html>

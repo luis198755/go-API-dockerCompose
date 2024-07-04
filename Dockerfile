@@ -15,6 +15,8 @@ COPY ./index.html ./index.html
 
 COPY ./json.html ./json.html
 
+COPY ./simu.html ./simu.html
+
 # Download any dependencies
 RUN go mod init example.com/api
 

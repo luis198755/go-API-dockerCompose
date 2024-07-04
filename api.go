@@ -198,6 +198,19 @@ func program(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func programsimu(w http.ResponseWriter, r *http.Request) {
+	var fileName = "simu.html"
+	t, err := template.ParseFiles(fileName)
+	if err != nil {
+		fmt.Println("Error parsing file")
+		return
+	}
+	err = t.ExecuteTemplate(w, fileName, nil)
+	if err != nil {
+		fmt.Println("Error when executing template", err)
+	}
+}
+
 func programJsonRaw(w http.ResponseWriter, r *http.Request) {
 	var fileName = "json.html"
 	t, err := template.ParseFiles(fileName)
@@ -257,6 +270,8 @@ func handleFunctions(w http.ResponseWriter, r *http.Request) {
 		programJson(w, r)
 	case "/json":
 		programJsonRaw(w, r)
+	case "/simu":
+		programsimu(w, r)
 	default:
 		fmt.Fprint(w, "Error")
 	}
