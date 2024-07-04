@@ -124,6 +124,20 @@
             color: red;
             font-weight: bold;
         }
+        .sync-status {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .sync-status.synchronized {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .sync-status.manual {
+            background-color: #FF9800;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -136,6 +150,7 @@
 
     <div class="section">
         <div class="section-title">Información Actual</div>
+        <div id="syncStatus" class="sync-status manual">Manual</div>
         <div id="debug"></div>
         <div id="phaseInfo"></div>
         <div id="currentInfo"></div>
@@ -164,6 +179,9 @@
         let sequenceTimeout = null;
         let currentEvent = null;
         let offsetCountdown = null;
+        let blinkInterval = null;
+        let isSynchronized = false;
+
 
         function createTrafficLights() {
             const container = document.getElementById('trafficLights');
@@ -229,6 +247,7 @@
 
             // Apagar todos los semáforos
             updateLights(0);
+            updateSyncStatus(false); // Reiniciar el estado de sincronización
 
             console.log('Sistema reiniciado');
         }
@@ -240,6 +259,7 @@
                 config = JSON.parse(jsonText);
                 console.log('Configuración cargada:', config);
                 updatePhaseInfo();
+                updateSyncStatus(!isAsynchronous);
                 startSequence(isAsynchronous);
             } catch (error) {
                 alert('Error al parsear el JSON: ' + error);
@@ -265,6 +285,8 @@
                 alert('No se encontró ningún evento anterior');
                 return;
             }
+
+            startBlinking();
 
             if (isAsynchronous) {
                 console.log('Iniciando secuencia asíncrona inmediatamente');
@@ -303,6 +325,7 @@
             startOffsetCountdown(offset);
 
             setTimeout(() => {
+                stopBlinking(); // Detener el parpadeo cuando termine el offset
                 currentSequence = {
                     escenarios: escenario,
                     ciclo: cycle,
@@ -435,6 +458,41 @@
         //             document.getElementById('jsonInput').value = 'Error al cargar el JSON. Por favor, intente nuevamente o ingrese el JSON manualmente.';
         //         });
         // }
+
+        function startBlinking() {
+            let isOn = false;
+            blinkInterval = setInterval(() => {
+                isOn = !isOn;
+                for (let i = 0; i < 10; i++) {
+                    const redLight = document.getElementById(`red-${i}`);
+                    redLight.classList.toggle('active', isOn);
+                }
+            }, 375);
+        }
+
+        function stopBlinking() {
+            if (blinkInterval) {
+                clearInterval(blinkInterval);
+                blinkInterval = null;
+            }
+            // Asegurarse de que todas las luces rojas estén apagadas
+            for (let i = 0; i < 10; i++) {
+                const redLight = document.getElementById(`red-${i}`);
+                redLight.classList.remove('active');
+            }
+        }
+
+        function updateSyncStatus(synchronized) {
+            const statusElement = document.getElementById('syncStatus');
+            isSynchronized = synchronized;
+            if (synchronized) {
+                statusElement.textContent = 'Sincronizado';
+                statusElement.className = 'sync-status synchronized';
+            } else {
+                statusElement.textContent = 'Manual';
+                statusElement.className = 'sync-status manual';
+            }
+        }
 
          // Inicialización
         createTrafficLights();
