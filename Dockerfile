@@ -20,6 +20,8 @@ COPY ./simu.html ./simu.html
 # Download any dependencies
 RUN go mod init example.com/api
 
+RUN go get -u github.com/gin-gonic/gin
+
 # (Assuming you have a go.mod and go.sum file in your project)
 #RUN go mod download
 
