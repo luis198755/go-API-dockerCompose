@@ -122,7 +122,7 @@ func saveJSONToFile(filename string, data Data) error {
 	return encoder.Encode(data)
 }
 
-func randomJson(w http.ResponseWriter, r *http.Request) {
+func randomJson(w http.ResponseWriter) {
 	data0 := createRandomJSON()
 	err := saveJSONToFile("random_data.json", data0)
 	if err != nil {
@@ -148,7 +148,7 @@ func randomJson(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-func staicJson(w http.ResponseWriter, r *http.Request) {
+func staicJson(w http.ResponseWriter) {
 	// Read the JSON file
 	file, err := os.Open("program.json")
 	if err != nil {
@@ -169,23 +169,23 @@ func staicJson(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-func serveStatus(w http.ResponseWriter, r *http.Request) {
+func serveStatus(w http.ResponseWriter) {
 	fmt.Fprint(w, "Ok")
 }
 
-func plain(w http.ResponseWriter, r *http.Request) {
+func plain(w http.ResponseWriter) {
 	fmt.Println("HTML Vs Plain")
 	w.Header().Set("Content-Type", "text/plain")
 	fmt.Fprint(w, "<h1>Hello World<h1>")
 }
 
-func html(w http.ResponseWriter, r *http.Request) {
+func html(w http.ResponseWriter) {
 	fmt.Println("HTML Vs Plain")
 	w.Header().Set("Content-Type", "text/html")
 	fmt.Fprint(w, "<h1>Hello World<h1>")
 }
 
-func program(w http.ResponseWriter, r *http.Request) {
+func program(w http.ResponseWriter) {
 	var fileName = "index.html"
 	t, err := template.ParseFiles(fileName)
 	if err != nil {
@@ -198,7 +198,7 @@ func program(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func programsimu(w http.ResponseWriter, r *http.Request) {
+func programsimu(w http.ResponseWriter) {
 	var fileName = "simu.html"
 	t, err := template.ParseFiles(fileName)
 	if err != nil {
@@ -211,7 +211,7 @@ func programsimu(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func programJsonRaw(w http.ResponseWriter, r *http.Request) {
+func programJsonRaw(w http.ResponseWriter) {
 	var fileName = "json.html"
 	t, err := template.ParseFiles(fileName)
 	if err != nil {
@@ -253,25 +253,25 @@ func handleFunctions(w http.ResponseWriter, r *http.Request) {
 	case "/":
 		fmt.Fprintln(w, "Hello World")
 	case "/random":
-		randomJson(w, r)
+		randomJson(w)
 	case "/static":
-		staicJson(w, r)
+		staicJson(w)
 	case "/jsonProg":
-		staicJson(w, r)
+		staicJson(w)
 	case "/plain":
-		plain(w, r)
+		plain(w)
 	case "/html":
-		html(w, r)
+		html(w)
 	case "/status":
-		serveStatus(w, r)
+		serveStatus(w)
 	case "/programSem":
-		program(w, r)
+		program(w)
 	case "/program":
 		programJson(w, r)
 	case "/json":
-		programJsonRaw(w, r)
+		programJsonRaw(w)
 	case "/simu":
-		programsimu(w, r)
+		programsimu(w)
 	default:
 		fmt.Fprint(w, "Error")
 	}
