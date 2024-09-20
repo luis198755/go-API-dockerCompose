@@ -1,47 +1,15 @@
 services:
-  nginx-proxy:
-    image: jwilder/nginx-proxy
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - certs:/etc/nginx/certs:ro
-      - confd:/etc/nginx/conf.d
-      - vhostd:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-    labels:
-      - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy
-      
-  letsencrypt:
-    image: jrcs/letsencrypt-nginx-proxy-companion:v1.12
-    restart: always
-    volumes:
-      - certs:/etc/nginx/certs:rw
-      - confd:/etc/nginx/conf.d
-      - vhostd:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-
+  
   golang-app:
     build: .
     restart: always
     container_name: api
-    expose:
+    ports:
       - "80:80"
     environment:
       - VIRTUAL_HOST=centurion.key-city.com
       - LETSENCRYPT_HOST=centurion.key-city.com
       - LETSENCRYPT_MAIL=luis@key-city.com
 
-volumes:
-  certs:
-  html:
-  vhostd:
-  confd:
-
-
-  
 
 
